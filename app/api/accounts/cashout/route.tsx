@@ -20,9 +20,12 @@ export async function GET(request: Request) {
 
  const accnumcount = await sql`SELECT 
     CASE 
-        WHEN cashout_pin = ${cashoutPin} AND cashout_amount>= ${cashoutAmount} THEN 'CASHOUT'
-		WHEN cashout_pin != ${cashoutPin} AND cashout_amount<= ${cashoutAmount} THEN 'INVALID PIN'
-		WHEN cashout_pin = ${cashoutPin} AND cashout_amount < ${cashoutAmount} THEN 'LIMIT EXCEEDED'
+      WHEN cashout_pin = ${cashoutPin} AND cashout_amount >= ${cashoutAmount} THEN 'CASHOUT'
+      WHEN cashout_pin != ${cashoutPin} AND cashout_amount IS NULL THEN 'INVALID PIN'
+      WHEN cashout_pin = ${cashoutPin} AND cashout_amount IS NULL THEN 'LIMIT EXCEEDED'
+      WHEN cashout_pin != ${cashoutPin} AND cashout_amount IS NOT NULL THEN 'INVALID PIN'
+      WHEN cashout_pin = ${cashoutPin} AND cashout_amount < ${cashoutAmount} THEN 'LIMIT EXCEEDED'
+      ELSE 'Not Sufficient Funds'
     END AS cashout_status
 FROM 
     Accounts WHERE
